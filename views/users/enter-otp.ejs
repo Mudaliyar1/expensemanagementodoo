@@ -1,0 +1,9 @@
+<h2>Enter OTP</h2>
+<form action="/users/verify-otp" method="POST" style="max-width:400px;margin:auto;">
+  <div class="mb-3">
+    <label for="otp" class="form-label">Enter the OTP sent to your email</label>
+    <input type="text" class="form-control" id="otp" name="otp" required maxlength="6">
+  </div>
+  <input type="hidden" name="email" value="<%= email %>">
+  <button type="submit" class="btn btn-success w-100">Verify OTP</button>
+</form>

@@ -1,22 +1,82 @@
+
 const express = require('express');
 const router = express.Router();
-// Login Page
-router.get('/login', (req, res) => {
-  res.render('users/login');
-});
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
-
 // Models
 const User = require('../models/User');
 const Company = require('../models/Company');
 const ApprovalWorkflow = require('../models/ApprovalWorkflow');
-
 // Auth middleware
 const { ensureAuthenticated, ensureAdmin } = require('../middleware/auth');
 
-// Profile Page
+// Login Page
+router.get('/login', (req, res) => {
+  res.render('users/login');
+});
 
+// Forgot Password - Request OTP
+router.get('/forgot-password', (req, res) => {
+  res.render('users/forgot-password');
+});
+
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.render('users/forgot-password', { error_msg: 'Please enter your email.' });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.render('users/forgot-password', { error_msg: 'No account found with that email.' });
+  }
+  // Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  user.resetOtp = otp;
+  user.resetOtpExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+  await user.save();
+  // Send OTP email
+  const { sendOtpEmail } = require('../utils/emailSender');
+  await sendOtpEmail(email, otp);
+  res.render('users/enter-otp', { email });
+});
+
+// Verify OTP
+router.post('/verify-otp', async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) {
+    return res.render('users/enter-otp', { email, error_msg: 'Please enter the OTP.' });
+  }
+  const user = await User.findOne({ email });
+  if (!user || !user.resetOtp || !user.resetOtpExpires) {
+    return res.render('users/enter-otp', { email, error_msg: 'Invalid or expired OTP.' });
+  }
+  if (user.resetOtp !== otp || user.resetOtpExpires < Date.now()) {
+    return res.render('users/enter-otp', { email, error_msg: 'Invalid or expired OTP.' });
+  }
+  // OTP verified, show reset password form
+  res.render('users/reset-password', { email });
+});
+
+// Reset Password
+router.post('/reset-password', async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    return res.render('users/reset-password', { email, error_msg: 'Please enter a new password.' });
+  }
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.render('users/reset-password', { email, error_msg: 'User not found.' });
+  }
+  const salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(password, salt);
+  user.resetOtp = null;
+  user.resetOtpExpires = null;
+  await user.save();
+  req.flash('success_msg', 'Password reset successful. You can now log in.');
+  res.redirect('/users/login');
+});
+
+// Profile Page
 router.get('/profile', ensureAuthenticated, async (req, res) => {
   try {
     // Populate company for display

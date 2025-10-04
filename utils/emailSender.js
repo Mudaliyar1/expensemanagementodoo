@@ -40,4 +40,17 @@ const sendUserCredentialsEmail = async ({ to, name, password, role, company }) =
   return await sendEmail(to, subject, htmlContent);
 };
 
-module.exports = { sendEmail, sendUserCredentialsEmail };
+// Send OTP email for password reset
+const sendOtpEmail = async (to, otp) => {
+  const subject = 'Your Expense Management OTP Code';
+  const htmlContent = `
+    <p>Your OTP code for password reset is:</p>
+    <h2>${otp}</h2>
+    <p>This code will expire in 10 minutes.</p>
+    <p>If you did not request this, please ignore this email.</p>
+    <p>Regards,<br>Expense Management Team</p>
+  `;
+  return await sendEmail(to, subject, htmlContent);
+};
+
+module.exports = { sendEmail, sendUserCredentialsEmail, sendOtpEmail };

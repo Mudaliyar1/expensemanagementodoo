@@ -1,4 +1,32 @@
+
 <h2>User Management</h2>
+
+<form action="/admin/users" method="GET" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <input type="text" class="form-control" name="name" placeholder="Name" value="<%= typeof filter !== 'undefined' && filter.name ? filter.name : '' %>">
+  </div>
+  <div class="col-md-3">
+    <input type="email" class="form-control" name="email" placeholder="Email" value="<%= typeof filter !== 'undefined' && filter.email ? filter.email : '' %>">
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="role">
+      <option value="">All Roles</option>
+      <option value="Employee" <%= filter && filter.role === 'Employee' ? 'selected' : '' %>>Employee</option>
+      <option value="Manager" <%= filter && filter.role === 'Manager' ? 'selected' : '' %>>Manager</option>
+      <option value="Admin" <%= filter && filter.role === 'Admin' ? 'selected' : '' %>>Admin</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select class="form-select" name="active">
+      <option value="">All Status</option>
+      <option value="true" <%= filter && filter.active === 'true' ? 'selected' : '' %>>Active</option>
+      <option value="false" <%= filter && filter.active === 'false' ? 'selected' : '' %>>Inactive</option>
+    </select>
+  </div>
+  <div class="col-md-2 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+</form>
 
 <div class="mb-4">
   <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
