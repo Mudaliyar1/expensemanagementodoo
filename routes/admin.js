@@ -1,3 +1,4 @@
+
 const express = require('express');
 const router = express.Router();
 const { ensureAuthenticated, ensureAdmin } = require('../middleware/auth');
@@ -5,6 +6,37 @@ const User = require('../models/User');
 const Company = require('../models/Company');
 const Expense = require('../models/Expense');
 const ApprovalWorkflow = require('../models/ApprovalWorkflow');
+
+// Bulk delete expenses
+router.post('/expenses/bulk-delete', ensureAdmin, async (req, res) => {
+  try {
+    const ids = req.body.expenseIds || [];
+    if (!Array.isArray(ids) || ids.length === 0) {
+      req.flash('error_msg', 'No expenses selected for deletion');
+      return res.redirect('/admin/expenses');
+    }
+    await Expense.deleteMany({ _id: { $in: ids } });
+    req.flash('success_msg', 'Selected expenses deleted successfully');
+    res.redirect('/admin/expenses');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error deleting expenses');
+    res.redirect('/admin/expenses');
+  }
+});
+
+// Delete individual expense
+router.post('/expenses/delete/:id', ensureAdmin, async (req, res) => {
+  try {
+    await Expense.findByIdAndDelete(req.params.id);
+    req.flash('success_msg', 'Expense deleted successfully');
+    res.redirect('/admin/expenses');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error deleting expense');
+    res.redirect('/admin/expenses');
+  }
+});
 
 // Helper: safely parse steps object from form data into workflow steps
 function parseWorkflowSteps(steps) {

@@ -67,6 +67,7 @@
             <table class="table table-striped">
               <thead>
                 <tr>
+                  <th><input type="checkbox" id="selectAllProcessed" /></th>
                   <th>Date</th>
                   <th>Employee</th>
                   <th>Category</th>
@@ -78,6 +79,7 @@
               <tbody>
                 <% processedExpenses.forEach(function(expense) { %>
                   <tr>
+                    <td><input type="checkbox" class="expense-checkbox-processed" name="expenseIds[]" value="<%= expense._id %>" /></td>
                     <td><%= new Date(expense.date).toLocaleDateString() %></td>
                     <td><%= expense.submittedBy.name %></td>
                     <td><%= expense.category %></td>
@@ -96,12 +98,23 @@
                       <a href="/expenses/view/<%= expense._id %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i> View
                       </a>
+                      <form action="/approvals/delete/<%= expense._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this expense from history?')">Delete</button>
+                      </form>
                     </td>
                   </tr>
                 <% }); %>
               </tbody>
             </table>
-          </div>
+          <form id="bulkDeleteFormProcessed" action="/approvals/bulk-delete" method="POST">
+            <button type="submit" class="btn btn-danger mb-3" onclick="return confirm('Delete selected expenses from history?')">Bulk Delete Selected</button>
+          </form>
+          <script>
+            document.getElementById('selectAllProcessed').addEventListener('change', function() {
+              const checkboxes = document.querySelectorAll('.expense-checkbox-processed');
+              checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+          </script>
         <% } else { %>
           <div class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i> No processed approvals found.

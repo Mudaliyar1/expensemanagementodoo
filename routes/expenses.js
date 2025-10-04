@@ -4,6 +4,42 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { ensureAuthenticated, ensureEmployee } = require('../middleware/auth');
+
+// Delete individual expense (employee)
+router.post('/delete/:id', ensureAuthenticated, async (req, res) => {
+  try {
+    const expense = await Expense.findOne({ _id: req.params.id, submittedBy: req.user._id });
+    if (!expense) {
+      req.flash('error_msg', 'Expense not found or not authorized');
+      return res.redirect('/expenses/dashboard');
+    }
+    await Expense.findByIdAndDelete(req.params.id);
+    req.flash('success_msg', 'Expense deleted successfully');
+    res.redirect('/expenses/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error deleting expense');
+    res.redirect('/expenses/dashboard');
+  }
+});
+
+// Bulk delete expenses (employee)
+router.post('/bulk-delete', ensureAuthenticated, async (req, res) => {
+  try {
+    const ids = req.body.expenseIds || [];
+    if (!Array.isArray(ids) || ids.length === 0) {
+      req.flash('error_msg', 'No expenses selected for deletion');
+      return res.redirect('/expenses/dashboard');
+    }
+    await Expense.deleteMany({ _id: { $in: ids }, submittedBy: req.user._id });
+    req.flash('success_msg', 'Selected expenses deleted successfully');
+    res.redirect('/expenses/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error deleting expenses');
+    res.redirect('/expenses/dashboard');
+  }
+});
 const Expense = require('../models/Expense');
 const User = require('../models/User');
 const Company = require('../models/Company');

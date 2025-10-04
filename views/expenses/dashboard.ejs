@@ -29,6 +29,7 @@
             <table class="table table-striped">
               <thead>
                 <tr>
+                  <th><input type="checkbox" id="selectAllPending" /></th>
                   <th>Date</th>
                   <th>Category</th>
                   <th>Amount</th>
@@ -39,6 +40,7 @@
               <tbody>
                 <% expenses.filter(e => e.status === 'Pending').forEach(function(expense) { %>
                   <tr>
+                    <td><input type="checkbox" class="expense-checkbox-pending" name="expenseIds[]" value="<%= expense._id %>" /></td>
                     <td><%= new Date(expense.date).toLocaleDateString() %></td>
                     <td><%= expense.category %></td>
                     <td><%= expense.amount %> <%= expense.currency %></td>
@@ -47,12 +49,23 @@
                       <a href="/expenses/view/<%= expense._id %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i> View
                       </a>
+                      <form action="/expenses/delete/<%= expense._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this expense?')">Delete</button>
+                      </form>
                     </td>
                   </tr>
                 <% }); %>
               </tbody>
             </table>
-          </div>
+          <form id="bulkDeleteFormPending" action="/expenses/bulk-delete" method="POST">
+            <button type="submit" class="btn btn-danger mb-3" onclick="return confirm('Delete selected expenses?')">Bulk Delete Selected</button>
+          </form>
+          <script>
+            document.getElementById('selectAllPending').addEventListener('change', function() {
+              const checkboxes = document.querySelectorAll('.expense-checkbox-pending');
+              checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+          </script>
         <% } else { %>
           <p class="text-muted">No pending expenses found.</p>
         <% } %>
@@ -65,6 +78,7 @@
             <table class="table table-striped">
               <thead>
                 <tr>
+                  <th><input type="checkbox" id="selectAllApproved" /></th>
                   <th>Date</th>
                   <th>Category</th>
                   <th>Amount</th>
@@ -75,6 +89,7 @@
               <tbody>
                 <% expenses.filter(e => e.status === 'Approved').forEach(function(expense) { %>
                   <tr>
+                    <td><input type="checkbox" class="expense-checkbox-approved" name="expenseIds[]" value="<%= expense._id %>" /></td>
                     <td><%= new Date(expense.date).toLocaleDateString() %></td>
                     <td><%= expense.category %></td>
                     <td><%= expense.amount %> <%= expense.currency %></td>
@@ -83,12 +98,23 @@
                       <a href="/expenses/view/<%= expense._id %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i> View
                       </a>
+                      <form action="/expenses/delete/<%= expense._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this expense?')">Delete</button>
+                      </form>
                     </td>
                   </tr>
                 <% }); %>
               </tbody>
             </table>
-          </div>
+          <form id="bulkDeleteFormApproved" action="/expenses/bulk-delete" method="POST">
+            <button type="submit" class="btn btn-danger mb-3" onclick="return confirm('Delete selected expenses?')">Bulk Delete Selected</button>
+          </form>
+          <script>
+            document.getElementById('selectAllApproved').addEventListener('change', function() {
+              const checkboxes = document.querySelectorAll('.expense-checkbox-approved');
+              checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+          </script>
         <% } else { %>
           <p class="text-muted">No approved expenses found.</p>
         <% } %>
@@ -101,6 +127,7 @@
             <table class="table table-striped">
               <thead>
                 <tr>
+                  <th><input type="checkbox" id="selectAllRejected" /></th>
                   <th>Date</th>
                   <th>Category</th>
                   <th>Amount</th>
@@ -111,6 +138,7 @@
               <tbody>
                 <% expenses.filter(e => e.status === 'Rejected').forEach(function(expense) { %>
                   <tr>
+                    <td><input type="checkbox" class="expense-checkbox-rejected" name="expenseIds[]" value="<%= expense._id %>" /></td>
                     <td><%= new Date(expense.date).toLocaleDateString() %></td>
                     <td><%= expense.category %></td>
                     <td><%= expense.amount %> <%= expense.currency %></td>
@@ -119,12 +147,23 @@
                       <a href="/expenses/view/<%= expense._id %>" class="btn btn-sm btn-info">
                         <i class="fas fa-eye"></i> View
                       </a>
+                      <form action="/expenses/delete/<%= expense._id %>" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this expense?')">Delete</button>
+                      </form>
                     </td>
                   </tr>
                 <% }); %>
               </tbody>
             </table>
-          </div>
+          <form id="bulkDeleteFormRejected" action="/expenses/bulk-delete" method="POST">
+            <button type="submit" class="btn btn-danger mb-3" onclick="return confirm('Delete selected expenses?')">Bulk Delete Selected</button>
+          </form>
+          <script>
+            document.getElementById('selectAllRejected').addEventListener('change', function() {
+              const checkboxes = document.querySelectorAll('.expense-checkbox-rejected');
+              checkboxes.forEach(cb => cb.checked = this.checked);
+            });
+          </script>
         <% } else { %>
           <p class="text-muted">No rejected expenses found.</p>
         <% } %>

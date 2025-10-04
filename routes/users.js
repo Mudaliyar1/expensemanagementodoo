@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+// Login Page
+router.get('/login', (req, res) => {
+  res.render('users/login');
+});
 const bcrypt = require('bcryptjs');
 const passport = require('passport');
 
@@ -12,6 +16,7 @@ const ApprovalWorkflow = require('../models/ApprovalWorkflow');
 const { ensureAuthenticated, ensureAdmin } = require('../middleware/auth');
 
 // Profile Page
+
 router.get('/profile', ensureAuthenticated, async (req, res) => {
   try {
     // Populate company for display
@@ -23,108 +28,7 @@ router.get('/profile', ensureAuthenticated, async (req, res) => {
     res.redirect('/dashboard');
   }
 });
-
-// Login Page
-router.get('/login', (req, res) => res.render('users/login'));
-
-// Register Page
-router.get('/register', (req, res) => res.render('users/register'));
-
-// Register Handle
-router.post('/register', async (req, res) => {
-  const { name, email, password, password2, country } = req.body;
-  let errors = [];
-
-  // Check required fields
-  if (!name || !email || !password || !password2 || !country) {
-    errors.push({ msg: 'Please fill in all fields' });
-  }
-
-  // Check passwords match
-  if (password !== password2) {
-    errors.push({ msg: 'Passwords do not match' });
-  }
-
-  // Check password length
-  if (password.length < 6) {
-    errors.push({ msg: 'Password should be at least 6 characters' });
-  }
-
-  if (errors.length > 0) {
-    res.render('users/register', {
-      errors,
-      name,
-      email,
-      country
-    });
-  } else {
-    try {
-      // Check if user exists
-      const existingUser = await User.findOne({ email });
-      
-      if (existingUser) {
-        errors.push({ msg: 'Email is already registered' });
-        return res.render('users/register', {
-          errors,
-          name,
-          email,
-          country
-        });
-      }
-
-      // Create new company and user
-      const company = new Company({
-        name: name + "'s Company",
-        country,
-        defaultCurrency: getCurrencyByCountry(country)
-      });
-      
-      await company.save();
-
-      // Create default approval workflow
-      const workflow = new ApprovalWorkflow({
-        name: 'Default Workflow',
-        company: company._id,
-        includeManagerApproval: true,
-        steps: [
-          {
-            stepNumber: 1,
-            approvers: [],
-            requiredApprovalPercentage: 100
-          }
-        ]
-      });
-      
-      await workflow.save();
-
-      // Hash Password
-      const salt = await bcrypt.genSalt(10);
-      const hash = await bcrypt.hash(password, salt);
-      
-      // Check if this is the first user in the system
-      const userCount = await User.countDocuments();
-      
-      // Create new user
-      const newUser = new User({
-        name,
-        email,
-        password: hash,
-        role: userCount === 0 ? 'Admin' : 'Employee', // Only first user is admin
-        company: company._id
-      });
-      
-      await newUser.save();
-      
-      req.flash('success_msg', 'You are now registered and can log in');
-      res.redirect('/users/login');
-    } catch (err) {
-      console.error(err);
-      req.flash('error_msg', 'An error occurred during registration');
-      res.redirect('/users/register');
-    }
-  }
-});
-
+// Login Handle
 // Login Handle
 router.post('/login', (req, res, next) => {
   // Save email to pass back in case of failure
@@ -220,8 +124,22 @@ router.post('/create', ensureAdmin, async (req, res) => {
     });
     
     await newUser.save();
-    
-    req.flash('success_msg', `User created successfully. Temporary password: ${password}`);
+
+    // Send credentials email to new user
+    const { sendUserCredentialsEmail } = require('../utils/emailSender');
+    try {
+      await sendUserCredentialsEmail({
+        to: email,
+        name,
+        password,
+        role,
+        company: req.user.company
+      });
+      req.flash('success_msg', `User created successfully. Credentials sent to ${email}`);
+    } catch (emailErr) {
+      console.error('Error sending credentials email:', emailErr);
+      req.flash('success_msg', `User created successfully, but failed to send email. Temporary password: ${password}`);
+    }
     res.redirect('/users/manage');
   } catch (err) {
     console.error(err);
@@ -286,4 +204,5 @@ function getCurrencyByCountry(country) {
   return currencyMap[country] || 'USD';
 }
 
+module.exports = router;
 module.exports = router;

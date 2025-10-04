@@ -7,6 +7,48 @@ const User = require('../models/User');
 const ApprovalWorkflow = require('../models/ApprovalWorkflow');
 const Company = require('../models/Company');
 
+// Delete individual processed approval (manager/employer)
+router.post('/delete/:id', ensureManager, async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) {
+      req.flash('error_msg', 'Expense not found');
+      return res.redirect('/approvals/dashboard');
+    }
+    // Remove this manager's approval history for this expense
+    expense.approvalHistory = expense.approvalHistory.filter(h => h.approver.toString() !== req.user._id.toString());
+    await expense.save();
+    req.flash('success_msg', 'Approval history deleted');
+    res.redirect('/approvals/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error deleting approval history');
+    res.redirect('/approvals/dashboard');
+  }
+});
+
+// Bulk delete processed approvals (manager/employer)
+router.post('/bulk-delete', ensureManager, async (req, res) => {
+  try {
+    const ids = req.body.expenseIds || [];
+    if (!Array.isArray(ids) || ids.length === 0) {
+      req.flash('error_msg', 'No approvals selected for deletion');
+      return res.redirect('/approvals/dashboard');
+    }
+    const userId = req.user._id.toString();
+    await Expense.updateMany(
+      { _id: { $in: ids } },
+      { $pull: { approvalHistory: { approver: userId } } }
+    );
+    req.flash('success_msg', 'Selected approval histories deleted');
+    res.redirect('/approvals/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error deleting approval histories');
+    res.redirect('/approvals/dashboard');
+  }
+});
+
 // Manager Dashboard
 router.get('/dashboard', ensureManager, async (req, res) => {
   try {
