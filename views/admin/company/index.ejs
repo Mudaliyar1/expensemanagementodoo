@@ -1,0 +1,103 @@
+<h2>Company Settings</h2>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Company Information</h5>
+      </div>
+      <div class="card-body">
+        <form action="/admin/company/update" method="POST">
+          <div class="mb-3">
+            <label for="name" class="form-label">Company Name</label>
+            <input type="text" class="form-control" id="name" name="name" value="<%= company.name %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="country" class="form-label">Country</label>
+            <select class="form-select" id="country" name="country" required>
+              <option value="" disabled>Select Country</option>
+              <option value="US" <%= company.country === 'US' ? 'selected' : '' %>>United States</option>
+              <option value="GB" <%= company.country === 'GB' ? 'selected' : '' %>>United Kingdom</option>
+              <option value="CA" <%= company.country === 'CA' ? 'selected' : '' %>>Canada</option>
+              <option value="AU" <%= company.country === 'AU' ? 'selected' : '' %>>Australia</option>
+              <option value="DE" <%= company.country === 'DE' ? 'selected' : '' %>>Germany</option>
+              <option value="FR" <%= company.country === 'FR' ? 'selected' : '' %>>France</option>
+              <option value="JP" <%= company.country === 'JP' ? 'selected' : '' %>>Japan</option>
+              <option value="CN" <%= company.country === 'CN' ? 'selected' : '' %>>China</option>
+              <option value="IN" <%= company.country === 'IN' ? 'selected' : '' %>>India</option>
+              <option value="BR" <%= company.country === 'BR' ? 'selected' : '' %>>Brazil</option>
+              <option value="ZA" <%= company.country === 'ZA' ? 'selected' : '' %>>South Africa</option>
+              <option value="SG" <%= company.country === 'SG' ? 'selected' : '' %>>Singapore</option>
+              <option value="AE" <%= company.country === 'AE' ? 'selected' : '' %>>United Arab Emirates</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="defaultCurrency" class="form-label">Default Currency</label>
+            <select class="form-select" id="defaultCurrency" name="defaultCurrency" required>
+              <option value="USD" <%= company.defaultCurrency === 'USD' ? 'selected' : '' %>>USD - US Dollar</option>
+              <option value="EUR" <%= company.defaultCurrency === 'EUR' ? 'selected' : '' %>>EUR - Euro</option>
+              <option value="GBP" <%= company.defaultCurrency === 'GBP' ? 'selected' : '' %>>GBP - British Pound</option>
+              <option value="JPY" <%= company.defaultCurrency === 'JPY' ? 'selected' : '' %>>JPY - Japanese Yen</option>
+              <option value="CAD" <%= company.defaultCurrency === 'CAD' ? 'selected' : '' %>>CAD - Canadian Dollar</option>
+              <option value="AUD" <%= company.defaultCurrency === 'AUD' ? 'selected' : '' %>>AUD - Australian Dollar</option>
+              <option value="CHF" <%= company.defaultCurrency === 'CHF' ? 'selected' : '' %>>CHF - Swiss Franc</option>
+              <option value="CNY" <%= company.defaultCurrency === 'CNY' ? 'selected' : '' %>>CNY - Chinese Yuan</option>
+              <option value="INR" <%= company.defaultCurrency === 'INR' ? 'selected' : '' %>>INR - Indian Rupee</option>
+              <option value="ZAR" <%= company.defaultCurrency === 'ZAR' ? 'selected' : '' %>>ZAR - South African Rand</option>
+              <option value="SGD" <%= company.defaultCurrency === 'SGD' ? 'selected' : '' %>>SGD - Singapore Dollar</option>
+              <option value="AED" <%= company.defaultCurrency === 'AED' ? 'selected' : '' %>>AED - UAE Dirham</option>
+            </select>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Update Company Settings</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Company Information</h5>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>Created On</span>
+            <span><%= new Date(company.createdAt).toLocaleDateString() %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>Total Users</span>
+            <span class="badge bg-primary rounded-pill"><%= userCount %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>Total Expenses</span>
+            <span class="badge bg-primary rounded-pill"><%= expenseCount %></span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>Active Workflows</span>
+            <span class="badge bg-primary rounded-pill"><%= workflowCount %></span>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">Currency Information</h5>
+      </div>
+      <div class="card-body">
+        <p class="text-muted">
+          The default currency is used for reporting and displaying expense totals. Individual expenses can be submitted in different currencies and will be automatically converted to the default currency.
+        </p>
+        <p class="text-muted">
+          Currency conversion rates are updated daily using external exchange rate services.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>

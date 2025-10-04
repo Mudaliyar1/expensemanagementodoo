@@ -1,0 +1,56 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env and config
+.env
+.env.*
+config/*.js
+config/*.json
+
+# VSCode
+.vscode/
+
+# Build
+build/
+dist/
+
+# Uploads
+public/uploads/
+
+# Others
+*.swp
+*.swo
+
+# Secure files
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.asc
+
+# Coverage
+coverage/
+
+# Misc
+.idea/
+*.iml
+
+# MongoDB
+*.mongodb
+
+# Temporary
+.tmp/
+*.tmp

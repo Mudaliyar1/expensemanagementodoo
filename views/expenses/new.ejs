@@ -1,0 +1,104 @@
+<h2>Submit New Expense</h2>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-body">
+        <form action="/expenses/new" method="POST" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="amount" class="form-label">Amount</label>
+            <div class="input-group">
+              <input type="number" step="0.01" min="0.01" id="amount" name="amount" class="form-control" required>
+              <select id="currency" name="currency" class="form-select" style="max-width: 120px;">
+                <option value="<%= company.defaultCurrency %>" selected><%= company.defaultCurrency %></option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="JPY">JPY</option>
+                <option value="CAD">CAD</option>
+                <option value="AUD">AUD</option>
+                <option value="CHF">CHF</option>
+                <option value="CNY">CNY</option>
+                <option value="INR">INR</option>
+              </select>
+            </div>
+            <small class="text-muted">Company default currency: <%= company.defaultCurrency %></small>
+          </div>
+          
+          <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select id="category" name="category" class="form-select" required>
+              <option value="" selected disabled>Select Category</option>
+              <option value="Travel">Travel</option>
+              <option value="Meals">Meals</option>
+              <option value="Accommodation">Accommodation</option>
+              <option value="Office Supplies">Office Supplies</option>
+              <option value="Equipment">Equipment</option>
+              <option value="Software">Software</option>
+              <option value="Training">Training</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          
+          <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
+          </div>
+          
+          <div class="mb-3">
+            <label for="date" class="form-label">Date of Expense</label>
+            <input type="date" id="date" name="date" class="form-control" max="<%= new Date().toISOString().split('T')[0] %>" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="receipt" class="form-label">Receipt (Optional)</label>
+            <input type="file" id="receipt" name="receipt" class="form-control" accept="image/jpeg,image/png,application/pdf">
+            <small class="text-muted">Max size: 5MB. Allowed formats: JPG, PNG, PDF</small>
+          </div>
+          
+          <div class="mb-3">
+            <label for="workflowId" class="form-label">Approval Workflow</label>
+            <select id="workflowId" name="workflowId" class="form-select" required>
+              <option value="" selected disabled>Select Workflow</option>
+              <% workflows.forEach(function(workflow) { %>
+                <option value="<%= workflow._id %>"><%= workflow.name %></option>
+              <% }); %>
+            </select>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Submit Expense</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Submission Guidelines</h5>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            All fields except receipt are required
+          </li>
+          <li class="list-group-item">
+            <i class="fas fa-calendar-alt text-primary me-2"></i>
+            Expense date cannot be in the future
+          </li>
+          <li class="list-group-item">
+            <i class="fas fa-money-bill-wave text-primary me-2"></i>
+            Amount will be converted to company currency
+          </li>
+          <li class="list-group-item">
+            <i class="fas fa-file-alt text-primary me-2"></i>
+            Receipts should be clear and legible
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

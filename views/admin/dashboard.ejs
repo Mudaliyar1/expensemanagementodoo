@@ -1,0 +1,146 @@
+<h2>Admin Dashboard</h2>
+
+<div class="row mb-4">
+  <!-- Stats Cards -->
+  <div class="col-md-3">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-title">Total Expenses</h6>
+            <h2 class="mb-0"><%= stats.totalExpenses %></h2>
+          </div>
+          <i class="fas fa-file-invoice-dollar fa-3x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-title">Approved</h6>
+            <h2 class="mb-0"><%= stats.approvedExpenses %></h2>
+          </div>
+          <i class="fas fa-check-circle fa-3x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="card text-white bg-warning">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-title">Pending</h6>
+            <h2 class="mb-0"><%= stats.pendingExpenses %></h2>
+          </div>
+          <i class="fas fa-clock fa-3x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-3">
+    <div class="card text-white bg-danger">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6 class="card-title">Rejected</h6>
+            <h2 class="mb-0"><%= stats.rejectedExpenses %></h2>
+          </div>
+          <i class="fas fa-times-circle fa-3x opacity-50"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <!-- Quick Actions -->
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Quick Actions</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          <a href="/admin/users" class="btn btn-outline-primary">
+            <i class="fas fa-users me-2"></i> Manage Users
+          </a>
+          <a href="/admin/company" class="btn btn-outline-primary">
+            <i class="fas fa-building me-2"></i> Company Settings
+          </a>
+          <a href="/admin/workflows" class="btn btn-outline-primary">
+            <i class="fas fa-sitemap me-2"></i> Approval Workflows
+          </a>
+          <a href="/admin/expenses" class="btn btn-outline-primary">
+            <i class="fas fa-file-invoice me-2"></i> All Expenses
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Recent Expenses -->
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Recent Expenses</h5>
+        <a href="/admin/expenses" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-body">
+        <% if(recentExpenses.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Employee</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% recentExpenses.forEach(function(expense) { %>
+                  <tr>
+                    <td><%= new Date(expense.date).toLocaleDateString() %></td>
+                    <td><%= expense.submittedBy.name %></td>
+                    <td><%= expense.category %></td>
+                    <td>
+                      <%= expense.amount %> <%= expense.currency %>
+                      <% if(expense.currency !== company.defaultCurrency) { %>
+                        <br><small class="text-muted"><%= expense.convertedAmount %> <%= company.defaultCurrency %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge <%= expense.status === 'Approved' ? 'bg-success' : (expense.status === 'Rejected' ? 'bg-danger' : 'bg-warning') %>">
+                        <%= expense.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <a href="/expenses/view/<%= expense._id %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i> View
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No expenses found.
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

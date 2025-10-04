@@ -1,0 +1,61 @@
+<h2>Edit Workflow</h2>
+
+<form action="/admin/workflows/<%= workflow._id %>?_method=PUT" method="POST" id="workflowEditForm">
+  <div class="mb-3">
+    <label for="name" class="form-label">Workflow Name</label>
+    <input type="text" id="name" name="name" class="form-control" value="<%= workflow.name %>" required />
+  </div>
+
+  <div class="form-check mb-3">
+    <input type="checkbox" id="includeManagerApproval" name="includeManagerApproval" class="form-check-input" <%= workflow.includeManagerApproval ? 'checked' : '' %> />
+    <label for="includeManagerApproval" class="form-check-label">Include submitter's manager as first approver</label>
+  </div>
+
+  <div class="mb-3 form-check">
+    <input type="checkbox" id="active" name="isActive" class="form-check-input" <%= workflow.isActive ? 'checked' : '' %> />
+    <label class="form-check-label" for="active">Active</label>
+  </div>
+
+  <h4>Steps</h4>
+  <div id="stepsContainer">
+    <% if (workflow.steps && workflow.steps.length > 0) { %>
+      <% workflow.steps.forEach((step, idx) => { %>
+        <div class="card mb-3">
+          <div class="card-body">
+              <input type="hidden" name="steps[<%= idx %>][stepNumber]" value="<%= step.stepNumber %>" />
+              <div class="mb-3">
+                <label class="form-label">Approvers</label>
+                <select class="form-select" name="steps[<%= idx %>][approvers]" multiple>
+                <% users.filter(u => u.role === 'Manager' || u.role === 'Admin').forEach(u => { %>
+                  <option value="<%= u._id %>" <%= step.approvers && step.approvers.find(a => a._id && a._id.toString() === u._id.toString()) ? 'selected' : '' %>><%= u.name %> (<%= u.role %>)</option>
+                <% }); %>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Required Approval Percentage</label>
+              <input type="number" name="steps[<%= idx %>][requiredApprovalPercentage]" class="form-control" min="1" max="100" value="<%= step.requiredApprovalPercentage %>" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Specific Approver Override</label>
+              <select class="form-select" name="steps[<%= idx %>][specificApproverOverride]">
+                <option value="">None</option>
+                <% users.filter(u => u.role === 'Manager' || u.role === 'Admin').forEach(u => { %>
+                  <option value="<%= u._id %>" <%= step.specificApproverOverride && step.specificApproverOverride._id && step.specificApproverOverride._id.toString() === u._id.toString() ? 'selected' : '' %>><%= u.name %> (<%= u.role %>)</option>
+                <% }); %>
+              </select>
+            </div>
+          </div>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <div class="alert alert-info">No steps to edit.</div>
+    <% } %>
+  </div>
+
+  <div class="d-grid gap-2">
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <a href="/admin/workflows" class="btn btn-secondary">Cancel</a>
+  </div>
+</form>

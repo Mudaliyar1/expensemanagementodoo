@@ -1,0 +1,87 @@
+<h2>Approval Workflows</h2>
+
+<div class="mb-4">
+  <a href="/admin/workflows/new" class="btn btn-primary">
+    <i class="fas fa-plus"></i> New Workflow
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <% if(workflows.length > 0) { %>
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Steps</th>
+              <th>Manager Approval</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% workflows.forEach(function(workflow) { %>
+              <tr>
+                <td><%= workflow.name %></td>
+                <td><%= workflow.steps.length %></td>
+                <td>
+                  <% if(workflow.includeManagerApproval) { %>
+                    <span class="badge bg-success">Enabled</span>
+                  <% } else { %>
+                    <span class="badge bg-secondary">Disabled</span>
+                  <% } %>
+                </td>
+                <td>
+                  <% if(workflow.isActive) { %>
+                    <span class="badge bg-success">Active</span>
+                  <% } else { %>
+                    <span class="badge bg-danger">Inactive</span>
+                  <% } %>
+                </td>
+                <td>
+                  <div class="btn-group">
+                    <a href="/admin/workflows/view/<%= workflow._id %>" class="btn btn-sm btn-info">
+                      <i class="fas fa-eye"></i>
+                    </a>
+                    <a href="/admin/workflows/edit/<%= workflow._id %>" class="btn btn-sm btn-warning">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal<%= workflow._id %>">
+                      <i class="fas fa-trash"></i>
+                    </button>
+                  </div>
+                  
+                  <!-- Delete Modal -->
+                  <div class="modal fade" id="deleteModal<%= workflow._id %>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title">Confirm Delete</h5>
+                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                          Are you sure you want to delete the workflow "<%= workflow.name %>"?
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <form action="/admin/workflows/delete/<%= workflow._id %>?_method=DELETE" method="POST">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <div class="alert alert-info">
+        <i class="fas fa-info-circle me-2"></i> No approval workflows found. <a href="/admin/workflows/new">Create one</a> to get started.
+      </div>
+    <% } %>
+  </div>
+</div>

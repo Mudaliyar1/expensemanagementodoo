@@ -1,0 +1,232 @@
+<div class="row mb-4">
+  <div class="col-md-12">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="/dashboard">Dashboard</a></li>
+        <li class="breadcrumb-item active">Expense Details</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Expense Details</h5>
+        <span class="badge <%= expense.status === 'Approved' ? 'bg-success' : (expense.status === 'Rejected' ? 'bg-danger' : 'bg-warning') %>">
+          <%= expense.status %>
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p class="mb-1 text-muted">Amount</p>
+            <h5><%= expense.amount %> <%= expense.currency %></h5>
+            <% if(expense.currency !== company.defaultCurrency) { %>
+              <small class="text-muted">
+                <%= expense.convertedAmount %> <%= company.defaultCurrency %> (converted)
+              </small>
+            <% } %>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted">Category</p>
+            <h5><%= expense.category %></h5>
+          </div>
+        </div>
+        
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <p class="mb-1 text-muted">Date</p>
+            <h5><%= new Date(expense.date).toLocaleDateString() %></h5>
+          </div>
+          <div class="col-md-6">
+            <p class="mb-1 text-muted">Submitted By</p>
+            <h5><%= expense.submittedBy.name %></h5>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <p class="mb-1 text-muted">Description</p>
+          <p><%= expense.description %></p>
+        </div>
+        
+        <% if(expense.receipt) { %>
+          <div class="mb-3">
+            <p class="mb-1 text-muted">Receipt</p>
+            <div class="mt-2">
+              <a href="/uploads/<%= expense.receipt %>" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-file-alt me-1"></i> View Receipt
+              </a>
+            </div>
+          </div>
+        <% } %>
+        
+        <div class="mb-3">
+          <p class="mb-1 text-muted">Workflow</p>
+          <h5><%= expense.workflow && expense.workflow.name ? expense.workflow.name : 'N/A' %></h5>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Approval Actions for Approvers -->
+    <% if((['Manager','Admin','Financer','Director'].includes(user.role)) && expense.status === 'Pending' && 
+      (isCurrentApprover || user.role === 'Admin')) { %>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Approval Action</h5>
+        </div>
+        <div class="card-body">
+          <form action="/approvals/process/<%= expense._id %>" method="POST">
+            <div class="mb-3">
+              <label for="comment" class="form-label">Comment (Optional)</label>
+              <textarea id="comment" name="comment" class="form-control" rows="2"></textarea>
+            </div>
+            
+            <div class="d-flex gap-2">
+              <button type="submit" name="action" value="approve" class="btn btn-success">
+                <i class="fas fa-check me-1"></i> Approve
+              </button>
+              <button type="submit" name="action" value="reject" class="btn btn-danger">
+                <i class="fas fa-times me-1"></i> Reject
+              </button>
+              
+              <% if(user.role === 'Admin') { %>
+                <button type="submit" name="action" value="override" class="btn btn-warning">
+                  <i class="fas fa-exclamation-triangle me-1"></i> Admin Override
+                </button>
+              <% } %>
+            </div>
+          </form>
+        </div>
+      </div>
+    <% } %>
+    
+    <% if(expense.status === 'Pending' && expense.submittedBy._id.toString() === user._id.toString()) { %>
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="mb-0">Submitter Actions</h5>
+        </div>
+        <div class="card-body">
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+            <i class="fas fa-times-circle"></i> Withdraw Expense
+          </button>
+        </div>
+      </div>
+    <% } %>
+  </div>
+  
+  <!-- Withdraw Modal -->
+  <div class="modal fade" id="withdrawModal" tabindex="-1" aria-labelledby="withdrawModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="withdrawModalLabel">Withdraw Expense</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to withdraw this expense? This action cannot be undone.</p>
+          <form action="/expenses/<%= expense._id %>/withdraw" method="POST" id="withdrawForm">
+            <div class="mb-3">
+              <label for="withdrawReason" class="form-label">Reason for withdrawal (optional)</label>
+              <textarea class="form-control" id="withdrawReason" name="withdrawReason" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" form="withdrawForm" class="btn btn-danger">Withdraw Expense</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <!-- Approval Status -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Approval Status</h5>
+      </div>
+      <div class="card-body p-0">
+        <ul class="list-group list-group-flush">
+          <% if (expense.workflow && expense.workflow.steps) { %>
+            <% expense.workflow.steps.forEach((step, index) => { %>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-0">Step <%= index + 1 %></h6>
+                    <small class="text-muted">
+                      <% if(step.specificApproverOverride) { %>
+                        Specific Approver: <%= step.specificApproverOverride.name || step.specificApproverOverride %>
+                      <% } else { %>
+                        Required: <%= step.requiredApprovalPercentage %>% approval
+                      <% } %>
+                    </small>
+                  </div>
+                  <% 
+                    // For each step, check approvalHistory for that step
+                    const approvalsForStep = expense.approvalHistory.filter(a => a.step === (index + 1));
+                    const totalApprovers = approvalsForStep.length;
+                    const approvedCount = approvalsForStep.filter(a => (a.decision || '').toLowerCase() === 'approved').length;
+                    const pendingCount = approvalsForStep.filter(a => (a.decision || '').toLowerCase() === 'pending').length;
+                    if (expense.status === 'Rejected') {
+                  %>
+                      <span class="badge bg-danger">Rejected</span>
+                  <% } else if (expense.status === 'Approved') { %>
+                      <span class="badge bg-success">Completed</span>
+                  <% } else if (totalApprovers > 0 && approvedCount === totalApprovers) { %>
+                      <span class="badge bg-success">Completed</span>
+                  <% } else if (pendingCount > 0) { %>
+                      <span class="badge bg-warning">Current</span>
+                  <% } else { %>
+                      <span class="badge bg-secondary">Pending</span>
+                  <% } %>
+                </div>
+              </li>
+            <% }); %>
+          <% } else { %>
+            <li class="list-group-item">
+              <div class="p-2 text-muted">No workflow steps found.</div>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Approval History -->
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Approval History</h5>
+      </div>
+      <div class="card-body p-0">
+        <% if(expense.approvalHistory && expense.approvalHistory.length > 0) { %>
+          <ul class="list-group list-group-flush">
+            <% expense.approvalHistory.forEach(history => { %>
+              <li class="list-group-item">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="mb-0"><%= history.approver ? history.approver.name : 'Unknown Approver' %></h6>
+                    <small class="text-muted">
+                      <%= new Date(history.timestamp).toLocaleString() %>
+                    </small>
+                    <% if(history.comment) { %>
+                      <p class="mb-0 mt-1"><em>"<%= history.comment %>"</em></p>
+                    <% } %>
+                  </div>
+                  <% const histStatus = history.decision || history.action || ''; const histLower = (histStatus || '').toString().toLowerCase(); %>
+                  <span class="badge <%= histLower === 'approved' ? 'bg-success' : (histLower === 'rejected' ? 'bg-danger' : 'bg-warning') %>">
+                    <%= histStatus ? (histStatus.charAt(0).toUpperCase() + histStatus.slice(1)) : 'Pending' %>
+                  </span>
+                </div>
+              </li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <div class="p-3 text-center text-muted">
+            No approval actions yet
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

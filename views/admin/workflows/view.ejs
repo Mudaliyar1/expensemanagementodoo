@@ -1,0 +1,45 @@
+<h2>View Workflow</h2>
+
+<div class="card">
+  <div class="card-body">
+    <h4>
+      <%= workflow.name %>
+      <% if (workflow.isActive) { %>
+        <span class="badge bg-success ms-2">Active</span>
+      <% } else { %>
+        <span class="badge bg-secondary ms-2">Inactive</span>
+      <% } %>
+    </h4>
+    <p class="text-muted">Company: <%= company ? company.name : 'N/A' %></p>
+
+    <h5 class="mt-4">Steps</h5>
+    <% if (workflow.steps && workflow.steps.length > 0) { %>
+      <ul class="list-group">
+        <% workflow.steps.forEach(step => { %>
+          <li class="list-group-item">
+            <strong>Step <%= step.stepNumber %></strong>
+            <div>
+              Approvers: 
+              <% if (step.approvers && step.approvers.length > 0) { %>
+                <%= step.approvers.map(a => a.name || a.toString()).join(', ') %>
+              <% } else { %>
+                <em>None</em>
+              <% } %>
+            </div>
+            <div>Rule: <% if (step.specificApproverOverride) { %>Specific Approver (<%= step.specificApproverOverride.name || step.specificApproverOverride %>)<% } else { %><%= step.requiredApprovalPercentage %>% required<% } %></div>
+          </li>
+        <% }); %>
+      </ul>
+    <% } else { %>
+      <div class="alert alert-info">No steps defined for this workflow.</div>
+    <% } %>
+
+    <div class="mt-4">
+      <a href="/admin/workflows" class="btn btn-secondary">Back</a>
+      <a href="/admin/workflows/edit/<%= workflow._id %>" class="btn btn-primary">Edit</a>
+      <form action="/admin/workflows/delete/<%= workflow._id %>?_method=DELETE" method="POST" style="display:inline-block; margin-left:8px;">
+        <button type="submit" class="btn btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+</div>

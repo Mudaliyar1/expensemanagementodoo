@@ -1,0 +1,111 @@
+<h2>Approval Dashboard</h2>
+
+<div class="card">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs" id="approvalTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">Pending Approvals</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="processed-tab" data-bs-toggle="tab" data-bs-target="#processed" type="button" role="tab">Processed</button>
+      </li>
+    </ul>
+  </div>
+  <div class="card-body">
+    <div class="tab-content" id="approvalTabContent">
+      <!-- Pending Approvals -->
+      <div class="tab-pane fade show active" id="pending" role="tabpanel">
+        <% if(pendingExpenses.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Employee</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Step</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% pendingExpenses.forEach(function(expense) { %>
+                  <tr>
+                    <td><%= new Date(expense.date).toLocaleDateString() %></td>
+                    <td><%= expense.submittedBy.name %></td>
+                    <td><%= expense.category %></td>
+                    <td>
+                      <%= expense.amount %> <%= expense.currency %>
+                      <% if(expense.currency !== company.defaultCurrency) { %>
+                        <br><small class="text-muted"><%= expense.convertedAmount %> <%= company.defaultCurrency %></small>
+                      <% } %>
+                    </td>
+                    <td>Step <%= (typeof expense.currentApprovalStep === 'number' ? expense.currentApprovalStep : 0) + 1 %></td>
+                    <td>
+                      <a href="/expenses/view/<%= expense._id %>" class="btn btn-sm btn-primary">
+                        <i class="fas fa-check-circle"></i> Review
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No pending approvals found.
+          </div>
+        <% } %>
+      </div>
+      
+      <!-- Processed Approvals -->
+      <div class="tab-pane fade" id="processed" role="tabpanel">
+        <% if(processedExpenses.length > 0) { %>
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Employee</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% processedExpenses.forEach(function(expense) { %>
+                  <tr>
+                    <td><%= new Date(expense.date).toLocaleDateString() %></td>
+                    <td><%= expense.submittedBy.name %></td>
+                    <td><%= expense.category %></td>
+                    <td>
+                      <%= expense.amount %> <%= expense.currency %>
+                      <% if(expense.currency !== company.defaultCurrency) { %>
+                        <br><small class="text-muted"><%= expense.convertedAmount %> <%= company.defaultCurrency %></small>
+                      <% } %>
+                    </td>
+                    <td>
+                      <span class="badge <%= expense.status === 'Approved' ? 'bg-success' : 'bg-danger' %>">
+                        <%= expense.status %>
+                      </span>
+                    </td>
+                    <td>
+                      <a href="/expenses/view/<%= expense._id %>" class="btn btn-sm btn-info">
+                        <i class="fas fa-eye"></i> View
+                      </a>
+                    </td>
+                  </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        <% } else { %>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i> No processed approvals found.
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

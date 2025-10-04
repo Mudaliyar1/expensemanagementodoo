@@ -1,0 +1,198 @@
+<h2>Create New Approval Workflow</h2>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-body">
+        <form action="/admin/workflows/new" method="POST" id="workflowForm">
+          <div class="mb-3">
+            <label for="name" class="form-label">Workflow Name</label>
+            <input type="text" id="name" name="name" class="form-control" required>
+          </div>
+          
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="includeManagerApproval" name="includeManagerApproval">
+            <label class="form-check-label" for="includeManagerApproval">Include submitter's manager as first approver</label>
+          </div>
+          
+          <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="active" name="active" checked>
+            <label class="form-check-label" for="active">Active</label>
+          </div>
+          
+          <hr>
+          
+          <h4>Approval Steps</h4>
+          <p class="text-muted">Define the approval steps in sequence. Each step can have multiple approvers and conditional rules.</p>
+          
+          <div id="stepsContainer">
+            <!-- Step template will be added here -->
+          </div>
+          
+          <div class="mb-4">
+            <button type="button" id="addStepBtn" class="btn btn-outline-primary">
+              <i class="fas fa-plus"></i> Add Step
+            </button>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Create Workflow</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step Template (hidden) -->
+<template id="stepTemplate">
+  <div class="card mb-3 step-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Step <span class="step-number"></span></h5>
+      <button type="button" class="btn btn-sm btn-outline-danger remove-step-btn">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+        <label class="form-label">Approvers</label>
+          <input type="hidden" name="steps[0][stepNumber]" value="">
+          <select class="form-select approvers-select" name="steps[0][approvers]" multiple required>
+          <% users.filter(user => ['Manager','Admin','Financer','Director'].includes(user.role)).forEach(function(user) { %>
+            <option value="<%= user._id %>"><%= user.name %> (<%= user.role %>)</option>
+          <% }); %>
+        </select>
+        <small class="text-muted">Hold Ctrl/Cmd to select multiple approvers</small>
+      </div>
+      
+      <div class="mb-3">
+        <label class="form-label">Approval Rule</label>
+        <div class="form-check mb-2">
+          <input class="form-check-input rule-type" type="radio" name="steps[0][ruleType]" value="percentage" checked>
+          <label class="form-check-label">Percentage Rule</label>
+        </div>
+        
+        <div class="percentage-rule-container">
+          <label class="form-label">Required Approval Percentage</label>
+          <div class="input-group mb-3">
+            <input type="number" class="form-control required-percentage" name="steps[0][requiredApprovalPercentage]" min="1" max="100" value="100">
+            <span class="input-group-text">%</span>
+          </div>
+        </div>
+        
+        <div class="form-check mb-2">
+          <input class="form-check-input rule-type" type="radio" name="steps[0][ruleType]" value="specific">
+          <label class="form-check-label">Specific Approver Rule</label>
+        </div>
+        
+        <div class="specific-approver-container" style="display: none;">
+          <label class="form-label">Specific Approver</label>
+          <select class="form-select specific-approver" name="steps[0][specificApproverOverride]" disabled>
+            <option value="" selected disabled>Select Specific Approver</option>
+            <% users.filter(user => ['Manager','Admin','Financer','Director'].includes(user.role)).forEach(function(user) { %>
+              <option value="<%= user._id %>"><%= user.name %> (<%= user.role %>)</option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let stepCount = 0;
+    const stepsContainer = document.getElementById('stepsContainer');
+    const addStepBtn = document.getElementById('addStepBtn');
+    const stepTemplate = document.getElementById('stepTemplate');
+    
+    // Add initial step
+    addStep();
+    
+    // Add step button click handler
+    addStepBtn.addEventListener('click', addStep);
+    
+    // Function to add a new step
+    function addStep() {
+      const stepIndex = stepCount++;
+      const stepClone = document.importNode(stepTemplate.content, true);
+      
+      // Update step number
+      stepClone.querySelector('.step-number').textContent = stepIndex + 1;
+      
+      // Update form field names with correct index
+      const formFields = stepClone.querySelectorAll('[name^="steps[0]"]');
+      formFields.forEach(field => {
+        field.name = field.name.replace('steps[0]', `steps[${stepIndex}]`);
+      });
+      
+      // Add event listeners for rule type radios
+      const ruleTypeRadios = stepClone.querySelectorAll('.rule-type');
+      ruleTypeRadios.forEach(radio => {
+        radio.name = `steps[${stepIndex}][ruleType]`;
+        radio.addEventListener('change', function() {
+          const card = this.closest('.step-card');
+          const percentageContainer = card.querySelector('.percentage-rule-container');
+          const specificContainer = card.querySelector('.specific-approver-container');
+          const percentageInput = card.querySelector('.required-percentage');
+          const specificSelect = card.querySelector('.specific-approver');
+          
+          if (this.value === 'percentage') {
+            percentageContainer.style.display = 'block';
+            specificContainer.style.display = 'none';
+            percentageInput.disabled = false;
+            specificSelect.disabled = true;
+          } else {
+            percentageContainer.style.display = 'none';
+            specificContainer.style.display = 'block';
+            percentageInput.disabled = true;
+            specificSelect.disabled = false;
+          }
+        });
+      });
+      
+      // Add remove step button handler
+      const removeBtn = stepClone.querySelector('.remove-step-btn');
+      removeBtn.addEventListener('click', function() {
+        const stepCard = this.closest('.step-card');
+        stepCard.remove();
+        updateStepNumbers();
+      });
+      
+      // Append the new step
+      stepsContainer.appendChild(stepClone);
+      
+      // Disable remove button if only one step
+      updateRemoveButtons();
+    }
+    
+    // Update step numbers after removal
+    function updateStepNumbers() {
+      const stepCards = document.querySelectorAll('.step-card');
+      stepCards.forEach((card, index) => {
+        card.querySelector('.step-number').textContent = index + 1;
+      });
+      
+      updateRemoveButtons();
+    }
+    
+    // Update remove buttons (disable if only one step)
+    function updateRemoveButtons() {
+      const removeButtons = document.querySelectorAll('.remove-step-btn');
+      const disableRemove = removeButtons.length <= 1;
+      
+      removeButtons.forEach(btn => {
+        btn.disabled = disableRemove;
+      });
+    }
+    
+    // Form submission validation
+    document.getElementById('workflowForm').addEventListener('submit', function(e) {
+      const stepCards = document.querySelectorAll('.step-card');
+      if (stepCards.length === 0) {
+        e.preventDefault();
+        alert('Please add at least one approval step.');
+      }
+    });
+  });
+</script>
