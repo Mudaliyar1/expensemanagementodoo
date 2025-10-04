@@ -28,9 +28,9 @@
 </head>
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <nav class="navbar navbar-expand-lg navbar-dark" style="background: #875A7B;">
     <div class="container-fluid">
-      <a class="navbar-brand" href="<%= typeof user != 'undefined' && user ? '/dashboard' : '/' %>">Expense Management</a>
+        <a class="navbar-brand" href="<%= typeof user != 'undefined' && user ? '/dashboard' : '/' %>" style="color: #fff; font-weight: bold; letter-spacing: 1px;">Expense Odoo</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -38,27 +38,27 @@
         <ul class="navbar-nav me-auto">
           <% if(typeof user != 'undefined' && user){ %>
             <li class="nav-item">
-              <a class="nav-link" href="/dashboard">Dashboard</a>
+                <a class="nav-link" href="/dashboard" style="color: #fff;">Dashboard</a>
             </li>
             <% if(user.role === 'Admin'){ %>
               <li class="nav-item">
                 <a class="nav-link" href="/admin/expenses">All Expenses</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/users/manage">Users</a>
+             <a class="nav-link" href="/users/manage" style="color: #fff;">Users</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/admin/workflows">Workflows</a>
+             <a class="nav-link" href="/admin/workflows" style="color: #fff;">Workflows</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/admin/company">Company</a>
+             <a class="nav-link" href="/admin/company" style="color: #fff;">Company</a>
               </li>
             <% } else if(user.role === 'Manager'){ %>
               <li class="nav-item">
                 <a class="nav-link" href="/approvals/dashboard">Approvals</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/expenses/dashboard">My Expenses</a>
+                  <a class="nav-link" href="/expenses/dashboard" style="color: #fff;">My Expenses</a>
               </li>
             <% } else if(user.role === 'Financer' || user.role === 'Director') { %>
               <li class="nav-item">
@@ -69,7 +69,7 @@
                 <a class="nav-link" href="/expenses/dashboard">My Expenses</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/expenses/new">New Expense</a>
+                  <a class="nav-link" href="/expenses/new" style="color: #fff;">New Expense</a>
               </li>
             <% } %>
           <% } %>
@@ -77,7 +77,7 @@
           <ul class="navbar-nav ms-auto">
             <% if (typeof user !== 'undefined' && user) { %>
             <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" style="color: #fff;">
                 <i class="fas fa-user"></i> <%= user.name %>
               </a>
               <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -88,7 +88,7 @@
             </li>
             <% } else { %>
             <li class="nav-item">
-              <a class="nav-link" href="/users/login">
+                <a class="nav-link" href="/users/login" style="color: #fff;">
                 <i class="fas fa-sign-in-alt"></i> Login
               </a>
             </li>

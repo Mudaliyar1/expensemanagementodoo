@@ -68,7 +68,7 @@
           <tr>
             <td><input type="checkbox" class="expense-checkbox" name="expenseIds[]" value="<%= expense._id %>" /></td>
             <td><%= new Date(expense.date).toLocaleDateString() %></td>
-            <td><%= expense.submittedBy.name %></td>
+            <td><%= expense.submittedBy ? expense.submittedBy.name : 'Unknown' %></td>
             <td><%= expense.category %></td>
             <td><%= expense.amount.toFixed(2) %> <%= expense.currency %></td>
             <td>
