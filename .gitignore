@@ -15,8 +15,8 @@ Thumbs.db
 # Env and config
 .env
 .env.*
-config/*.js
-config/*.json
+# config/*.js
+# config/*.json
 
 # VSCode
 .vscode/
