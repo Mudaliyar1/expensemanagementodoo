@@ -163,16 +163,14 @@ router.get('/company', ensureAdmin, async (req, res) => {
 });
 
 // Update Company Settings
-router.post('/company', ensureAdmin, async (req, res) => {
+router.post('/company/update', ensureAdmin, async (req, res) => {
   try {
     const { name, defaultCurrency, country } = req.body;
-    
     await Company.findByIdAndUpdate(req.user.company, {
       name,
       defaultCurrency,
       country
     });
-    
     req.flash('success_msg', 'Company settings updated successfully');
     res.redirect('/admin/company');
   } catch (err) {

@@ -37,7 +37,9 @@
                     <td>
                       <%= expense.amount %> <%= expense.currency %>
                       <% if(expense.currency !== company.defaultCurrency) { %>
-                        <br><small class="text-muted"><%= expense.convertedAmount %> <%= company.defaultCurrency %></small>
+                        <br><small class="text-muted">Converted: <%= expense.convertedAmount %> <%= company.defaultCurrency %></small>
+                      <% } else { %>
+                        <br><small class="text-muted">Converted: <%= expense.amount %> <%= company.defaultCurrency %></small>
                       <% } %>
                     </td>
                     <td>Step <%= (typeof expense.currentApprovalStep === 'number' ? expense.currentApprovalStep : 0) + 1 %></td>

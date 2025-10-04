@@ -102,18 +102,7 @@
       </div>
     <% } %>
     
-    <% if(expense.status === 'Pending' && expense.submittedBy._id.toString() === user._id.toString()) { %>
-      <div class="card mb-4">
-        <div class="card-header">
-          <h5 class="mb-0">Submitter Actions</h5>
-        </div>
-        <div class="card-body">
-          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#withdrawModal">
-            <i class="fas fa-times-circle"></i> Withdraw Expense
-          </button>
-        </div>
-      </div>
-    <% } %>
+    
   </div>
   
   <!-- Withdraw Modal -->

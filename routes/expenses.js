@@ -99,26 +99,39 @@ router.post('/new', ensureAuthenticated, ensureEmployee, upload.single('receipt'
       return res.redirect('/expenses/new');
     }
 
-    // Convert currency if needed. Guard against conversion failures returning NaN/undefined
+    // Convert currency using real-time rates
     let convertedAmount = amountNum;
     if (currency !== company.defaultCurrency) {
       try {
-        const converter = new currencyConverter();
-        const result = await converter.from(currency).to(company.defaultCurrency).amount(amountNum).convert();
-        const parsed = parseFloat(result);
-        if (!isNaN(parsed)) {
-          convertedAmount = parsed;
-        } else {
-          console.error('Currency conversion returned invalid value:', result);
-          // Fallback to original amount to ensure a valid number is saved
-          convertedAmount = amountNum;
-        }
+        const currencyConverter = require('../utils/currencyConverter');
+        convertedAmount = await currencyConverter.convert(amountNum, currency, company.defaultCurrency);
       } catch (convErr) {
         console.error('Currency conversion failed:', convErr);
-        // Fallback to original amount to ensure a valid number is saved
         convertedAmount = amountNum;
       }
     }
+// Withdraw Expense (Employee)
+router.post('/:id/withdraw', ensureAuthenticated, ensureEmployee, async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id);
+    if (!expense) {
+      req.flash('error_msg', 'Expense not found');
+      return res.redirect('/expenses/dashboard');
+    }
+    // Only allow withdrawal if status is Pending and submitted by current user
+    if (expense.status !== 'Pending' || expense.submittedBy.toString() !== req.user._id.toString()) {
+      req.flash('error_msg', 'You can only withdraw your own pending expenses');
+      return res.redirect('/expenses/dashboard');
+    }
+    await Expense.findByIdAndDelete(req.params.id);
+    req.flash('success_msg', 'Expense withdrawn successfully');
+    res.redirect('/expenses/dashboard');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error withdrawing expense');
+    res.redirect('/expenses/dashboard');
+  }
+});
     
     // Create new expense
     const newExpense = new Expense({
