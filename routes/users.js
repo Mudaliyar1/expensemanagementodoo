@@ -11,6 +11,19 @@ const ApprovalWorkflow = require('../models/ApprovalWorkflow');
 // Auth middleware
 const { ensureAuthenticated, ensureAdmin } = require('../middleware/auth');
 
+// Profile Page
+router.get('/profile', ensureAuthenticated, async (req, res) => {
+  try {
+    // Populate company for display
+    const user = await User.findById(req.user._id).populate('company');
+    res.render('users/profile', { user });
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Error loading profile');
+    res.redirect('/dashboard');
+  }
+});
+
 // Login Page
 router.get('/login', (req, res) => res.render('users/login'));
 

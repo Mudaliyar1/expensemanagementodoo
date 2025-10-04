@@ -30,17 +30,17 @@
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-      <a class="navbar-brand" href="<%= typeof user != 'undefined' ? '/dashboard' : '/' %>">Expense Management</a>
+      <a class="navbar-brand" href="<%= typeof user != 'undefined' && user ? '/dashboard' : '/' %>">Expense Management</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav me-auto">
-          <% if(typeof user != 'undefined'){ %>
+          <% if(typeof user != 'undefined' && user){ %>
             <li class="nav-item">
               <a class="nav-link" href="/dashboard">Dashboard</a>
             </li>
-            <% if(user && user.role === 'Admin'){ %>
+            <% if(user.role === 'Admin'){ %>
               <li class="nav-item">
                 <a class="nav-link" href="/admin/expenses">All Expenses</a>
               </li>
@@ -53,18 +53,18 @@
               <li class="nav-item">
                 <a class="nav-link" href="/admin/company">Company</a>
               </li>
-            <% } else if(user && user.role === 'Manager'){ %>
+            <% } else if(user.role === 'Manager'){ %>
               <li class="nav-item">
                 <a class="nav-link" href="/approvals/dashboard">Approvals</a>
               </li>
               <li class="nav-item">
                 <a class="nav-link" href="/expenses/dashboard">My Expenses</a>
               </li>
-            <% } else if(user && (user.role === 'Financer' || user.role === 'Director')) { %>
+            <% } else if(user.role === 'Financer' || user.role === 'Director') { %>
               <li class="nav-item">
                 <a class="nav-link" href="/approvals/dashboard">Approvals</a>
               </li>
-            <% } else if(user) { %>
+            <% } else { %>
               <li class="nav-item">
                 <a class="nav-link" href="/expenses/dashboard">My Expenses</a>
               </li>
